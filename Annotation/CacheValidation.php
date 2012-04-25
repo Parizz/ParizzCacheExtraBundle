@@ -1,6 +1,8 @@
 <?php
 
-namespace Parizz\CacheBundle\Annotation;
+namespace Parizz\CacheExtraBundle\Annotation;
+
+use Parizz\CacheExtraBundle\Processor\ValidationProcessorInterface;
 
 /**
  * The CacheValidation class handles the @CacheValidation annotation parts.
@@ -10,15 +12,14 @@ namespace Parizz\CacheBundle\Annotation;
 class CacheValidation
 {
     /**
-     * @var \Parizz\CacheBundle\Validation\ValidationProviderInterface
+     * @var \Parizz\CacheExtraBundle\Processor\ValidationProcessorInterface
      */
-    private $provider;
-
+    private $processor;
+    
     /**
      * @var string
      */
     private $eTag;
-
     /**
      * @var \DateTime
      */
@@ -32,16 +33,20 @@ class CacheValidation
     public function __construct(array $values)
     {
         if (isset($values['value'])) {
-            $values['provider'] = $values['value'];
+            $values['processor'] = $values['value'];
         }
 
-        if (!isset($values['provider'])) {
-            throw new \InvalidArgumentException('No "provider" given for CacheValidation annotation');
+        if (!isset($values['processor'])) {
+            throw new \InvalidArgumentException('No "processor" given for CacheValidation annotation');
         }
 
-        $provider = new $values['provider'];
+        $processor = new $values['processor'];
 
-        $this->provider = $provider;
+        if (!$processor instanceof ValidationProcessorInterface) {
+            throw new \RuntimeException(sprintf('A cache validation processor has to implement the ValidationProcessorInterface, %s given.', get_class($processor)));
+        }
+
+        $this->processor = $processor;
     }
 
     /**
@@ -49,9 +54,9 @@ class CacheValidation
      *
      * @return \Parizz\CacheBundle\Validation\ValidationProviderInterface
      */
-    public function getProvider()
+    public function getProcessor()
     {
-        return $this->provider;
+        return $this->processor;
     }
 
     /**

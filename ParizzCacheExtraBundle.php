@@ -1,9 +1,9 @@
 <?php
 
-namespace Parizz\CacheBundle;
+namespace Parizz\CacheExtraBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class ParizzCacheBundle extends Bundle
+class ParizzCacheExtraBundle extends Bundle
 {
 }

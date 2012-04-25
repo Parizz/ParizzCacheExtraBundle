@@ -1,6 +1,6 @@
 <?php
 
-namespace Parizz\CacheValidationBundle;
+namespace Parizz\CacheExtraBundle\Processor;
 
 interface ValidationProcessorInterface
 {

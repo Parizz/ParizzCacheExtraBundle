@@ -5,11 +5,11 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="parizz_cache.cache_validation.listener.class">Parizz\CacheBundle\EventListener\CacheValidationListener</parameter>
+        <parameter key="parizz_cache_extra.response_validator.listener.class">Parizz\CacheExtraBundle\EventListener\ResponseValidatorListener</parameter>
     </parameters>
 
     <services>
-        <service id="parizz_cache.cache_validation.listener" class="%parizz_cache.cache_validation.listener.class%">
+        <service id="parizz_cache_extra.response_validator.listener" class="%parizz_cache_extra.response_validator.listener.class%">
             <tag name="kernel.event_listener" event="kernel.controller" method="onKernelController" />
             <tag name="kernel.event_listener" event="kernel.response" method="onKernelResponse" />
             <argument type="service" id="annotation_reader" />

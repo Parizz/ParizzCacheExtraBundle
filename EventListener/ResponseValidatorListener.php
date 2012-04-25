@@ -1,6 +1,6 @@
 <?php
 
-namespace Parizz\CacheValidationBundle\EventListener;
+namespace Parizz\CacheExtraBundle\EventListener;
 
 use Doctrine\Common\Annotations\Reader;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -8,8 +8,8 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Parizz\CacheBundle\Annotation\CacheValidation;
-use Parizz\CacheBundle\Validation\ValidationProviderInterface;
+use Parizz\CacheExtraBundle\Annotation\CacheValidation;
+use Parizz\CacheExtraBundle\Processor\ValidationProcessorInterface;
 
 class ResponseValidatorListener
 {
@@ -99,36 +99,27 @@ class ResponseValidatorListener
     {
         if (!$response) {
             $response = new Response;
-            $provider = $configuration->getProvider();
+            $processor = $configuration->getProcessor();
 
-            if (!$provider instanceof ValidationProviderInterface) {
-                throw new \RuntimeException('A validation provider has to implement the ValidationProviderInterface.');
+            if ($processor instanceof ContainerAwareInterface) {
+                $processor->setContainer($this->container);
             }
 
-            if ($provider instanceof ContainerAwareInterface) {
-                $provider->setContainer($this->container);
+            $validationHeaders = $processor->process();
+
+            if (isset($validationHeaders['etag'])) {
+                $configuration->setETag($validationHeaders['etag']);
             }
-
-            $validationHeaders = $provider->process();
-
-            if (isset($validationHeaders['eTag'])) {
-                $configuration->setETag($validationHeaders['eTag']);
-            }
-
-            if (isset($validationHeaders['lastModified'])) {
-                if (!$validationHeaders['lastModified'] instanceof \DateTime) {
-                    throw new \RuntimeException('A Last-Modified header has to be an instance of a \Datetime object, ' . gettype($validationHeaders['lastModified']) . ' given.');
-                }
-                $configuration->setLastModified($validationHeaders['lastModified']);
+            if (isset($validationHeaders['last_modified'])) {
+                $configuration->setLastModified($validationHeaders['last_modified']);
             }
         }
 
-        if ($configuration->getETag()) {
-            $response->setETag($configuration->getETag());
+        if ($etag = $configuration->getETag()) {
+            $response->setETag($etag);
         }
-
-        if ($configuration->getLastModified()) {
-            $response->setLastModified($configuration->getLastModified());
+        if ($lastModified = $configuration->getLastModified()) {
+            $response->setLastModified($lastModified);
         }
 
         return $response;
