@@ -1,2 +1,2 @@
-ParizzCacheValidationBundle
+ParizzCacheExtraBundle (wip)
 ===========================
